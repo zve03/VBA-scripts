@@ -1,0 +1,24 @@
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+'Versie 1.0 23092018
+
+Dim Vervaldatum As Date
+Dim pass As String
+Dim d As Date
+
+
+'INPUT
+'Geef hier de einddatum van de licentie in: dag, maand (telkens 2 cijfers), jaar (4 cijfers)
+Vervaldatum = Format("15/01/2019", "dd/mm/yyyy")
+d = Format(Date, "dd/mm/yyyy")
+
+pass = "pbi883" 'Dit is het paswoord dat je gebruikt. Kan per eigenaar aangepast worden. Let op: VBA project dan ook van code veranderen
+'-----------------------------------
+If d > Vervaldatum Then
+ThisWorkbook.Password = pass
+MsgBox ("Deze versie is verlopen. Contacteer de administrator.")
+Else
+ThisWorkbook.Password = "" 'Dit verwijdert het paswoord als de proefperiode bvb verlengd is
+End If
+
+
+End Sub

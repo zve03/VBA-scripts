@@ -1,0 +1,72 @@
+Option Explicit
+
+Sub CreateNames()
+'http://www.contextures.com/xlNames03.html
+
+' written by Roger Govier, Technology4U
+    Dim wb As Workbook, ws As Worksheet
+    Dim Lrow As Long, lcol As Long, i As Long
+    Dim myName As String, Start As String
+    Dim shtname As String
+
+    ' set the row number where headings are held as a constant
+    ' change this to the row number required if not row 1
+    Const Rowno = 1
+
+    ' set the Offset as the number of rows below Rowno, where the
+    ' data begins
+    Const Offset = 1
+
+    ' set the starting column for the data, in this case 1
+    ' change if the data does not start in column A
+    Const Colno = 1
+
+
+    On Error GoTo CreateNames_Error
+
+    Set wb = ActiveWorkbook
+    Set ws = ActiveSheet
+    shtname = Replace(ws.Name, " ", "_")
+
+    ' count the number of columns used in the row designated to
+    ' have the header names
+
+    lcol = ws.Cells(Rowno, 1).End(xlToRight).Column
+    Lrow = ws.Cells(Rows.Count, Colno).End(xlUp).Row
+    Start = Cells(Rowno, Colno).Address
+
+    wb.Names.Add Name:=shtname & "lcol", _
+                 RefersTo:="=COUNTA($" & Rowno & ":$" & Rowno & ")"
+    wb.Names.Add Name:=shtname & "lrow", _
+                 RefersToR1C1:="=COUNTA(C" & Colno & ")"
+    wb.Names.Add Name:=shtname & "myData", RefersTo:= _
+                  "=" & Start & ":INDEX($1:$65536," & shtname & "lrow," & shtname & "Lcol)"
+
+    For i = Colno To lcol
+        ' if a column header contains spaces,
+            ' replace the space with an underscore
+            ' spaces are not allowed in range names.
+        myName = Replace(Cells(Rowno, i).Value, " ", "_")
+        If myName = "" Then
+            ' if column header is blank, warn the user and
+            ' stop the macro at that point
+            ' names will only be created for those cells with text in them.
+            MsgBox "Missing Name in column " & i & vbCrLf _
+                   & "Please Enter a Name and run macro again"
+            Exit Sub
+        End If
+        wb.Names.Add Name:=shtname & myName, RefersToR1C1:= _
+             "=R" & Rowno + Offset & "C" & i & ":INDEX(C" & i & "," & shtname & "lrow)"
+nexti:
+    Next i
+
+    On Error GoTo 0
+    MsgBox "All dynamic Named ranges have been created"
+    Exit Sub
+
+CreateNames_Error:
+
+    MsgBox "Error " & Err.Number & " (" & Err.Description & _
+    ") in procedure CreateNames of Module Technology4U"
+
+End Sub
